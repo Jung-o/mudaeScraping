@@ -37,8 +37,7 @@ def get_character(character_url):
     if response.status_code != 200:
         print('Failed to get the page. Status code:', response.status_code)
         time.sleep(5)
-        get_character(character_url)
-        return None
+        return get_character(character_url)
     soup = BeautifulSoup(response.text, 'html.parser')
     info = {}
     series_div = soup.find(attrs={'data-source': 'series'})
@@ -57,8 +56,7 @@ def get_character_artworks(character_url):
     if response.status_code != 200:
         print('Failed to get the page. Status code:', response.status_code)
         time.sleep(5)
-        get_character_artworks(character_url)
-        return None
+        return get_character_artworks(character_url)
     soup = BeautifulSoup(response.text, 'html.parser')
     artworks = []
     character_aside = soup.find('aside', class_='type-character')
