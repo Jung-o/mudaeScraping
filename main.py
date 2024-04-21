@@ -52,10 +52,28 @@ def get_character(character_url):
     return info
 
 
+def get_character_artworks(character_url):
+    response = requests.get(character_url)
+    if response.status_code != 200:
+        print('Failed to get the page. Status code:', response.status_code)
+        time.sleep(5)
+        get_character_artworks(character_url)
+        return None
+    soup = BeautifulSoup(response.text, 'html.parser')
+    artworks = []
+    character_aside = soup.find('aside', class_='type-character')
+    for img_container in character_aside.find_all(class_='pi-image'):
+        img_tag = img_container.find('a')
+        img_url = img_tag['href']
+        artworks.append(img_url)
+    return artworks
+
+
 def main():
     all_characters = get_all_characters()
     for character in all_characters:
-        get_character(character)
+        char = get_character(character['url'])
+        urls = get_character_artworks(character['url'])
 
 
 if __name__ == "__main__":
