@@ -2,6 +2,9 @@ from bs4 import BeautifulSoup
 import requests
 from urllib.parse import quote_plus
 import time
+import mongo
+from tqdm import tqdm
+from concurrent.futures import ThreadPoolExecutor
 
 base_url = 'https://mudae.fandom.com'
 
@@ -27,6 +30,7 @@ def get_all_characters():
                 characters.append(character)
         print('Amount of characters:', len(characters))
         if len(characters) == 3602:
+            print('All characters have been fetched.')
             break
 
     return characters
@@ -41,7 +45,10 @@ def get_character(character_url):
     soup = BeautifulSoup(response.text, 'html.parser')
     info = {}
     series_div = soup.find(attrs={'data-source': 'series'})
-    series_name = series_div.find('a').text
+    try:
+        series_name = series_div.find('a').text
+    except AttributeError:
+        series_name = series_div.find('span').text
     info['series'] = series_name
 
     gender_div = soup.find(attrs={'data-source': 'gender'})
@@ -67,11 +74,25 @@ def get_character_artworks(character_url):
     return artworks
 
 
+def process_character(character):
+    charUrl = character['url']
+    charName = character['name']
+    char = get_character(charUrl)
+    charGender = char['gender']
+    charSeries = char['series']
+    artworksUrl = get_character_artworks(character['url'])
+
+    mongo.add_character(charName, charSeries, charGender, charUrl)
+    for artwork in artworksUrl:
+        mongo.add_artwork(charName, artwork)
+
+
 def main():
+    mongo.create_indexes()
     all_characters = get_all_characters()
-    for character in all_characters:
-        char = get_character(character['url'])
-        urls = get_character_artworks(character['url'])
+
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        list(tqdm(executor.map(process_character, all_characters), total=len(all_characters)))
 
 
 if __name__ == "__main__":
