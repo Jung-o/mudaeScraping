@@ -26,7 +26,8 @@ def add_character(name, series, gender, url):
         characters.insert_one({'characterId': char_id, 'name': name, 'series': series, 'gender': gender, 'charUrl': url})
 
 
-def add_artwork(character_id, url):
+def add_artwork(charName, url):
+    character_id = hashlib.md5(str.encode(charName)).hexdigest()
     artwork_id = hashlib.md5(str.encode(url)).hexdigest()
     artwork = artworks.find_one({'artworkId': artwork_id})
     if artwork is None:
