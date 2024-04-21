@@ -8,15 +8,17 @@ db = client['MudaeScraper']
 characters = db['Characters']
 artworks = db['Artworks']
 
-artworks.create_index([('characterId', 1)], unique=True)
-artworks.create_index([('artworkId', 1)], unique=True)
-artworks.create_index([('artworkUrl', 1)], unique=True)
-characters.create_index([('name', 1), ('series', 1)], unique=True)
-characters.create_index([('characterId', 1)], unique=True)
-characters.create_index([('gender', 1)], unique=True)
-characters.create_index([('name', -1), ('series', 1)], unique=True)
-characters.create_index([('series', 1), ('name', 1)], unique=True)
-characters.create_index([('series', -1), ('name', 1)], unique=True)
+
+def create_indexes():
+    artworks.create_index([('characterId', 1)])
+    artworks.create_index([('artworkId', 1)], unique=True)
+    artworks.create_index([('artworkUrl', 1)], unique=True)
+    characters.create_index([('name', 1), ('series', 1)])
+    characters.create_index([('characterId', 1)], unique=True)
+    characters.create_index([('gender', 1)])
+    characters.create_index([('name', -1), ('series', 1)])
+    characters.create_index([('series', 1), ('name', 1)])
+    characters.create_index([('series', -1), ('name', 1)])
 
 
 def add_character(name, series, gender, url):
